@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  name         String?
+  password     String
+  licenses     licenses[]
+  templates    templates[]
+  usersMeta    usersMeta[]
+  transactions transactions[]
+}
+
+model licenses {
+  id           Int            @id @default(autoincrement())
+  type         String
+  price        Int
+  description  String
+  users        users?       @relation(fields: [usersId], references: [id])
+  usersId      Int?
+  uiKits       uiKits?
+  transactions transactions[]
+}
+
+model templates {
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  description          String
+  integrationsTemplate templatesIntegration[]
+  users                users?              @relation(fields: [usersId], references: [id])
+  usersId              Int?
+  transactions         transactions[]
+}
+
+model transactions {
+  id                Int        @id @default(autoincrement())
+  method            String?
+  status            Boolean?   @default(false)
+  checkoutSessionId String?
+  customerId        String?
+  card              Json?
+  amount            Int?
+  users             users?     @relation(fields: [usersId], references: [id])
+  usersId           Int?
+  templates         templates? @relation(fields: [templatesId], references: [id])
+  templatesId       Int?
+  licenses          licenses?  @relation(fields: [licensesId], references: [id])
+  licensesId        Int?
+}
+
+model usersMeta {
+  id      Int     @id @default(autoincrement())
+  key     String?
+  value   String?
+  users   users?  @relation(fields: [usersId], references: [id])
+  usersId Int?
+}
+
+model uiKits {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String
+  licenses    licenses   @relation(fields: [licensesId], references: [id])
+  licensesId  Int        @unique
+  category    category[]
+}
+
+model category {
+  id          Int           @id @default(autoincrement())
+  name        String
+  uiKits      uiKits?       @relation(fields: [kitsId], references: [id])
+  kitsId      Int?
+  subCatgeory subCategory[]
+}
+
+model subCategory {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  category    category?    @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+  components  components[]
+}
+
+model components {
+  id            Int                     @id @default(autoincrement())
+  name          String
+  description   String
+  subCategory   subCategory?            @relation(fields: [subCategoryId], references: [id])
+  subCategoryId Int?
+  integrations  componentsIntegration[]
+  components    componentsMeta[]
+}
+
+model componentsMeta {
+  id           Int         @id @default(autoincrement())
+  key          String?
+  value        String?
+  components   components? @relation(fields: [componentsId], references: [id])
+  componentsId Int?
+}
+
+model componentsIntegration {
+  id           Int         @id @default(autoincrement())
+  framework    String
+  code         String
+  components   components? @relation(fields: [componentsId], references: [id])
+  componentsId Int?
+}
+
+model templatesIntegration {
+  id          Int        @id @default(autoincrement())
+  framework   String
+  code        String
+  templates   templates? @relation(fields: [templatesId], references: [id])
+  templatesId Int?
+}
