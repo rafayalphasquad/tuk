@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { hashSync, compareSync } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -9,9 +10,14 @@ export class UsersService {
 
   create(createUserDto: CreateUserDto) {
     return this.prisma.users.create({
-      data: createUserDto,
+      data: {
+        name: createUserDto.name,
+        email: createUserDto.email,
+        password: hashSync(createUserDto.password, 8),
+      },
       include: {
         templates: true,
+        licenses: true,
       },
     });
   }
@@ -45,7 +51,7 @@ export class UsersService {
     });
   }
 
- async findByEmail(email: string) {
+  async findByEmail(email: string) {
     return this.prisma.users.findUnique({
       where: {
         email: email,

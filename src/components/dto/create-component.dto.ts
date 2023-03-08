@@ -1,5 +1,12 @@
+import { Type } from 'class-transformer';
+import { IsString, IsNumber,IsOptional } from 'class-validator';
 export class CreateComponentDto {
-    subCategoryId?: number;
-    name: string;
-    description: string;
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  subCategoryId?: number;
+  @IsString()
+  name: string;
+  @IsString()
+  description: string;
 }

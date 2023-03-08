@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { HttpException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { compareSync, hashSync } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -12,10 +15,13 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findUser(email, password);
-    if (user && user.password === password) {
+
+    if (compareSync(password, user.password)) {
       const { password, ...result } = user;
       return result;
-    } else return null;
+    } else {
+      throw new HttpException('Invalid Credentials!', HttpStatus.UNAUTHORIZED);
+    }
   }
   login(user: any) {
     const payload = { email: user.email, sub: user.id };
@@ -25,8 +31,12 @@ export class AuthService {
   }
 
   async register(user: CreateUserDto) {
-    const newUser = await this.usersService.create(user);
-    return this.login(newUser);
+    try {
+      const newUser = await this.usersService.create(user);
+      return this.login(newUser);
+    } catch (error) {
+      throw new HttpException('User already exists!', HttpStatus.CONFLICT);
+    }
   }
 
   async validateSocialLogin(
@@ -42,7 +52,7 @@ export class AuthService {
       const userDto: CreateUserDto = {
         name: userName,
         email: email,
-        password: 'social123',
+        password: hashSync('social123', 8),
       };
       return this.register(userDto);
     }

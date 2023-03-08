@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'prisma/migrations/prisma.service';
+import { StripeService } from 'src/stripe/stripe.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
   constructor(private prisma: PrismaService) {}
-  create(createTransactionDto: CreateTransactionDto) {
+  async create(createTransactionDto: CreateTransactionDto) {
     return this.prisma.transactions.create({ data: createTransactionDto });
   }
 

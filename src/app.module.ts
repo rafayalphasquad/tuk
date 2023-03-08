@@ -17,6 +17,7 @@ import { SubCategory } from './sub-category/entities/sub-category.entity';
 import { SubCategoryModule } from './sub-category/sub-category.module';
 import { ComponentsIntegration } from './components-integration/entities/components-integration.entity';
 import { ComponentsIntegrationModule } from './components-integration/components-integration.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ComponentsIntegrationModule } from './components-integration/components
     ComponentsModule,
     CategoryModule,
     SubCategoryModule,
-    ComponentsIntegrationModule
+    ComponentsIntegrationModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
